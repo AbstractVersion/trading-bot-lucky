@@ -31,6 +31,8 @@ volumes:
             o: bind
             type: none
             device: /mnt/data/crypto/influx/data
+    graphana-provisioning:
+    graphana-dashboards:
 services:
     crypto-database:
         image: mariadb:latest
@@ -87,3 +89,14 @@ services:
             #     reservations:
             #         cpus: '0.25'
             #         memory: 1000M
+
+    grafana:
+      image: "grafana/grafana"
+      ports:
+      - "3000:3000"
+      environment:
+        GF_PATHS_DATA : /var/lib/grafana
+        GF_SECURITY_ADMIN_PASSWORD : kafka
+      volumes:
+      -  graphana-provisioning:/etc/grafana/provisioning
+      -  graphana-dashboards:/var/lib/grafana/dashboards

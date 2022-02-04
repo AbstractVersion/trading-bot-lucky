@@ -4,29 +4,35 @@ import time
 
 cg = CoinGeckoAPI()
 print ('Initializint...')
+coinlist = ['superfarm', 'bitcoin', 'ethereum' ,'terrausd', 'akash-network', 'cardano', 'spookyswap', 'thor', 'olympus', 'fantom']
 
-def writeMeasurement(value=None):
+def connectToInflux():
     try:
-        client = InfluxDBClient(    host= "influxDB", 
+        client = InfluxDBClient(    host= "192.168.1.8", 
                                     port=8086, 
                                     username="admin", 
-                                    password="admin"
+                                    password="sexmeup44"
                                 )
-        client.create_database("superfarm")
-        client.switch_database("superfarm")
+        client.create_database("crypto-curency-raw")
+        client.switch_database("crypto-curency-raw")
         print("connected to influx")
+        return client
     except:
         print('ERROR during connection with INFLUX DB')
+        return None
 
+def writeMeasurement(value=None,coin=None, against=None, timestamp=None, client = None):
+
+    print( 'coin : {} & price : {}'.format( coin,value))
     json_measurment = [{
-        "measurement" : "superfarm_usd",
+        "measurement" : "coin_per_minute",
         "tags" : {
-                "project": "crypto-spy",
-                "content": "crypto-market-monitoring"
+                "coin": coin,
+                "against": against
             },
-            "time": int(time.time()) ,
+            "time": timestamp ,
             "fields": {
-                "value": value
+                "price": float(value)
             }
         }]
     response = client.write_points(json_measurment , time_precision='ms')
@@ -35,11 +41,15 @@ def writeMeasurement(value=None):
     else: print('something went wrong during storage of measurment : ')
 
 
-# btc = (cg.get_price(ids='bitcoin', vs_currencies='usd'))
-superFarm = (cg.get_price(ids='SuperFarm', vs_currencies='usd'))
-# {'superfarm': {'usd': 1.18}}
-usdPrice = superFarm["superfarm"]["usd"]
-print(usdPrice)
-writeMeasurement(value=usdPrice)
-print('succesfull operation -> price : ' + str(usdPrice) + '    time : '+str(int(time.time())))
+def getCurrentCoinPrices(currency='usd'):
+    client = connectToInflux()
+    for d in coinlist:
+        data = (cg.get_price(ids=d, vs_currencies=currency))
+        price = data[d][currency]
+        print( 'coin : {} & price : {}'.format( d,price))
+        writeMeasurement(value=price,coin=d, against=currency, timestamp= int(time.time()), client=client) 
+        print ('appended')   
+
+getCurrentCoinPrices()
+# print('succesfull operation -> price : ' + str(usdPrice) + '    time : '+str(int(time.time())))
 # time.sleep(15)
