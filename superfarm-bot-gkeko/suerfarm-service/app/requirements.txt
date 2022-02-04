@@ -1,0 +1,11 @@
+Flask==1.0.3
+flask-restplus
+gunicorn
+Werkzeug==0.16.1
+Click==7.0
+requests
+Flask-B3
+Flask-Sleuth==0.0.6
+python-json-logger==0.1.11
+flask_cors
+influxdb

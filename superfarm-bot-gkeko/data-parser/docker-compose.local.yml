@@ -1,0 +1,40 @@
+version: '2'
+networks:
+  bridge_network:
+    driver: bridge
+services:
+
+  influxdb:
+    image: docker.io/bitnami/influxdb:1-debian-10
+    networks: 
+      - bridge_network
+    ports:
+      - 8086:8086
+      - 8088:8088
+    volumes:
+      - influxdb_data:/bitnami/influxdb
+    environment:
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_USER_PASSWORD=admin
+      - INFLUXDB_DB=superfarm
+
+  data-parser-pvAdapt:
+    image: private.registry.io/data-parser-superfarm:latest
+    networks: 
+      - bridge_network
+    # env_file: 
+    #   - .local.env
+    # environment:
+    #   USER: admin
+    #   PWD: admin
+    #   HOST: influxdb
+    #   PORT: 8086
+    #   DB_NAME: pv_adapt_raw
+
+volumes:
+  influxdb_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/georgiosfiotakis/Documents/temp/trading-bot/crypto-repo/superfarm-bot-gkeko/influx-volume
+      o: bind
